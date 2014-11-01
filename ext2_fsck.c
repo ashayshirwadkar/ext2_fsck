@@ -14,6 +14,8 @@ inline unsigned int block_offset(unsigned int block)
 }
 
 
+
+
 /*
  * read_dir - reads the containts of directory
  * @fd - file descriptor 
@@ -34,6 +36,9 @@ static void read_dir(int fd, const struct ext2_inode *inode,
 		struct ext2_dir_entry_2 *entry;
 		unsigned int size = 0;
 
+		printf("\ninode -> Directory\n");
+		printf("\nReading Directories \n");
+
 		/* allocate memory for the data block */
 		
 		if ((block = malloc(block_size)) == NULL) { 
@@ -46,7 +51,7 @@ static void read_dir(int fd, const struct ext2_inode *inode,
 
 		lseek(fd, inode->i_block[0] * block_size, SEEK_SET);
 		read(fd, block, block_size);         
-
+		
  		/* first entry in the directory */
 		
 		entry = (struct ext2_dir_entry_2 *) block; 
@@ -69,6 +74,21 @@ static void read_dir(int fd, const struct ext2_inode *inode,
 
 		free(block);
 	}
+	 
+
+	if ((block = malloc(block_size)) == NULL) {
+                        fprintf(stderr, "Memory error\n");
+                        close(fd);
+                        exit(1);
+                    }
+                    
+	if(S_ISREG(inode->i_mode)) {
+		printf("\ninode -> Regular File\n");
+		lseek(fd, inode->i_block[0] * block_size, SEEK_SET);
+        read(fd, block, block_size);
+		printf("Reading Contents\n  %s", (char *)block);	
+	}
+
 } 
 
 /*
@@ -86,7 +106,7 @@ static void read_inode(int fd, int inode_no,
 						struct ext2_inode *inode)
 {
 	lseek(fd, group->bg_inode_table * block_size + 
-			((inode_no - 1) * sizeof(struct ext2_inode)), SEEK_SET);
+			((inode_no - 1) * 2 * sizeof(struct ext2_inode)), SEEK_SET);
 	read(fd, inode, sizeof(struct ext2_inode));
 } 
 
@@ -94,7 +114,7 @@ static void read_inode(int fd, int inode_no,
 int main()
 {
 	char name[15] = "/dev/sda2";
-	int input_fd, i;
+	int input_fd, i ,j;
 	long op;
 	unsigned char boot[1024], bit[4098];
 	unsigned char *bitmap;
@@ -160,9 +180,11 @@ int main()
 	
 	
 	/*read inode from disk */
-	read_inode(input_fd,3,&grp_desc,&inode);
+	//for(j = 3;j<40;j++){
+	//printf("\nJ =%d\n",j );
+	read_inode(input_fd,13,&grp_desc,&inode);
 	
-	printf("\nReading root inode :\n"
+	printf("\nReading inode :\n"
 	       "File mode: %hu\n"
 	       "Owner UID: %hu\n"
 	       "Size     : %u bytes\n"
@@ -187,9 +209,9 @@ int main()
 				/* triple indirect block */
 			printf("Triple   : %u\n", inode.i_block[i]);
 	
-	printf("\nReading Directories \n");
-	read_dir(input_fd, &inode, &grp_desc);
 
+	read_dir(input_fd, &inode, &grp_desc);
+//}
 	close(input_fd);
 	return 0;
 }
