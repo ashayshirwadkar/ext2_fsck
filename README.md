@@ -1,7 +1,13 @@
 ext2_fsck
 =========
-    You can check the filesystem information using two tools
-    1.dumpe2fs
-        usage:	dumpe2fs /dev/sda*
-    2.fsstat
-        usage:	fsstat /dev/sda*
+This is implementation of fsck for ext2 filesystem. Mainly created for educational purpose.
+
+You can check the filesystem information using two tools
+- dumpe2fs
+```sh
+$ dumpe2fs /dev/sda*
+```
+- fsstat
+```sh
+$ fsstat /dev/sda*
+```
